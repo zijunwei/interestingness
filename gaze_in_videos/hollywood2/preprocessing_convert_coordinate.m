@@ -1,3 +1,6 @@
+% load data from samples, then convert the screen coordinate into video
+% coordinate
+
 
 clear;
 clc;
