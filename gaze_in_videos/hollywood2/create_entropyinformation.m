@@ -2,29 +2,30 @@
 %
 
 
-% clear;
-% clc;
-% close all
-%
-% addpath('~/Dev/ZFunc');
-% addpath('~/Dev/ZFunc/Gaze')
-% datasetup=setup();
-% fprintf('Loading information...\n');
-% load(datasetup.VisualInformationPath);
-% fprintf('Done\n')
-% entropySize=[360,480];
+clear;
+clc;
+close all
+
+addpath('~/Dev/ZFunc');
+addpath('~/Dev/ZFunc/Gaze')
+datasetup=setup();
+fprintf('Loading information...\n');
+load(datasetup.VisualInformationPath);
+fprintf('Done\n')
+entropySize=[360,480];
 
 %%
 % current set fdm's width to be 15, but the exact value has to be
 % re-computed
 addpath('~/Dev/ZFunc/saliency/code_forMetrics/');
 
-VideoEntropy(length(VideoInformation))=struct('videoname',[],'entropy',[]);
+VideoEntropy(length(VideoInformation))=struct('videoname',[],'entropy',[],'fdms',[]);
 for i=1:1:length(VideoInformation)
-    fprintf('---processing %s\n',VideoInformation(i).videoname);
-%     videoObj=VideoReader(fullfile(datasetup.videoDir,VideoInformation(i).videoname));
-%     FrameCount=1;
+    fprintf('---processing %s \t [ %04d | %04d]\n',VideoInformation(i).videoname,i,length(VideoInformation));
+    videoObj=VideoReader(fullfile(datasetup.videoDir,VideoInformation(i).videoname));
+    FrameCount=1;
     entro=0;
+%     fdms={};
     while hasFrame(videoObj)
         videoFrame=readFrame(videoObj);
         
@@ -53,10 +54,10 @@ for i=1:1:length(VideoInformation)
         videoFrameSz=size(videoFrame);
         gazePosition=z_cropCoordinates(gazePosition,[videoFrameSz(2),videoFrameSz(1)]);
         
-        
         bmap=drawFixBMap(videoFrame,gazePosition);
         fdm=run_antonioGaussian(bmap,15);
         fdm=fdm/max(fdm(:));
+        
         %         hfdm = imshow(fdm); set(hfdm, 'AlphaData', 0.5);
         %         colormap jet
         
@@ -66,7 +67,7 @@ for i=1:1:length(VideoInformation)
         rfdm=imresize(fdm,entropySize);
         rfdm=rfdm/max(rfdm(:));
         entro(FrameCount)= entropy(rfdm);
-        
+%         fdms{FrameCount}=fdm;
         %         plot(1:length(entro),entro,'*r');
         %         xlim([0, max(length(entro),10)]);
         %         ylim([0,50]);
@@ -79,5 +80,9 @@ for i=1:1:length(VideoInformation)
         
     end
     VideoEntropy(i).videoname=VideoInformation(i).videoname;
+%     VideoEntropy(i).fdms=fdms;
+    
     VideoEntropy(i).entropy=entro;
 end
+save(fullfile(datasetup.gazeDatasetDir,'VideoEntropy.mat'),'VideoEntropy','-v7.3');
+
