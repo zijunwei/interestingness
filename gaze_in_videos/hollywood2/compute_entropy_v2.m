@@ -1,33 +1,36 @@
-% visalize gaze data in a more complete way
+% compute entropy
 %
 
 
-clear;
-clc;
-close all
-
-addpath('~/Dev/ZFunc');
-addpath('~/Dev/ZFunc/Gaze')
-datasetup=setup_mac();
-load(fullfile(datasetup.gazeDatasetDir,'VideoInformation.mat'));
-
-entropySize=[360,480];
+% clear;
+% clc;
+% close all
+%
+% addpath('~/Dev/ZFunc');
+% addpath('~/Dev/ZFunc/Gaze')
+% datasetup=setup();
+% fprintf('Loading information...\n');
+% load(datasetup.VisualInformationPath);
+% fprintf('Done\n')
+% entropySize=[360,480];
 
 %%
 % current set fdm's width to be 15, but the exact value has to be
 % re-computed
 addpath('~/Dev/ZFunc/saliency/code_forMetrics/');
 
+VideoEntropy(length(VideoInformation))=struct('videoname',[],'entropy',[]);
 for i=1:1:length(VideoInformation)
-    videoObj=VideoReader(fullfile(datasetup.videoDir,VideoInformation(i).videoname));
-    FrameCount=1;
-    
+    fprintf('---processing %s\n',VideoInformation(i).videoname);
+%     videoObj=VideoReader(fullfile(datasetup.videoDir,VideoInformation(i).videoname));
+%     FrameCount=1;
+    entro=0;
     while hasFrame(videoObj)
         videoFrame=readFrame(videoObj);
         
-        subplot(1,2,1)
-        imshow(videoFrame);
-        hold on;
+        %         subplot(1,2,1)
+        %         imshow(videoFrame);
+        %         hold on;
         gazePosition=zeros(length(length(VideoInformation(i).gaze)),2);
         for j=1:1:length(VideoInformation(i).gaze)
             gaze=( VideoInformation(i).gaze(j).data);
@@ -54,26 +57,27 @@ for i=1:1:length(VideoInformation)
         bmap=drawFixBMap(videoFrame,gazePosition);
         fdm=run_antonioGaussian(bmap,15);
         fdm=fdm/max(fdm(:));
-        hfdm = imshow(fdm); set(hfdm, 'AlphaData', 0.5);
-        colormap jet
+        %         hfdm = imshow(fdm); set(hfdm, 'AlphaData', 0.5);
+        %         colormap jet
         
-        hold off
+        %         hold off
         
-        subplot(1,2,2)
+        %         subplot(1,2,2)
         rfdm=imresize(fdm,entropySize);
         rfdm=rfdm/max(rfdm(:));
-        entro(FrameCount+1)= entropy(rfdm);
+        entro(FrameCount)= entropy(rfdm);
         
-        plot(1:length(entro),entro,'*r');
-        xlim([0, max(length(entro),10)]);
-        ylim([0,50]);
+        %         plot(1:length(entro),entro,'*r');
+        %         xlim([0, max(length(entro),10)]);
+        %         ylim([0,50]);
         
         % debug or for step visualization
-        waitforbuttonpress;
+        %         waitforbuttonpress;
         
         % increase by 1
         FrameCount=FrameCount+1;
         
     end
-    
+    VideoEntropy(i).videoname=VideoInformation(i).videoname;
+    VideoEntropy(i).entropy=entro;
 end

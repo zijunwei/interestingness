@@ -9,7 +9,16 @@ close all
 addpath('~/Dev/ZFunc');
 
 %%
-datasetup=setup_mac();
+if ismac
+    datasetup=setup_mac();
+    
+elseif isunix
+    datasetup=setup();
+else
+    error('Unspecified system')
+end
+
+
 
 listofVideos=z_getFileIdsfromDir(datasetup.videoDir,'.avi');
 listofVideos=cellfun(@(x)cat(2,x,'.avi') ,listofVideos,'uniformoutput',false);
@@ -30,7 +39,7 @@ listofGazeSamples=z_getFileIdsfromDir(datasetup.gazeDir,'.txt');
 listofGazeSamples=cellfun(@(x)cat(2,x,'.txt') ,listofGazeSamples,'uniformoutput',false);
 
 
-%% change eye movement coordinate from screen-wise to image-wise 
+%% change eye movement coordinate from screen-wise to image-wise
 % caution, for different platforms, this code might needed to be changed a
 % little bit
 
@@ -65,7 +74,7 @@ for i=1:1:length(listofVideos)
         pp_area=gaze_data{3};
         gaze_type=gaze_data{end};
         for k=1:1:length(gaze_data{1})
-        fprintf(write_fileId,'%d\t%f\t%f\t%f\t%f\t%s\n',time_frames(k),pp_diameter(k),pp_area(k),video_coord(k,1),video_coord(k,2),gaze_type{k});
+            fprintf(write_fileId,'%d\t%f\t%f\t%f\t%f\t%s\n',time_frames(k),pp_diameter(k),pp_area(k),video_coord(k,1),video_coord(k,2),gaze_type{k});
         end
         fclose(write_fileId);
     end

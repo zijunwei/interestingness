@@ -23,7 +23,7 @@ addpath('~/Dev/ZFunc');
 % import matlab.unittest.constraints.IssuesWarnings;
 
 %%
-datasetup=setup_mac();
+datasetup=setup();
 
 
 
@@ -52,10 +52,7 @@ listofSBFiles=cellfun(@(x)cat(2,x,'.sht') ,listofSBFiles,'uniformoutput',false);
 % caution, for different platforms, this code might needed to be changed a
 % little bit
 
-% new_dir=fullfile(datasetup.videoDatasetDir ,'samples_video_coords');
-% if ~exist(new_dir,'dir')
-%     mkdir(new_dir)
-% end
+
 
 VideoInformation(length(listofVideos)) =struct('videoname',[],'framerate',[],'resolution',[],'gaze',[],'shotbounds',[]);
 
@@ -63,6 +60,11 @@ for i=1:1:length(listofVideos)
     
     videoName=listofVideos{i};
     indx=z_cellfind(videoName,validvideoNames);
+    if isempty(indx)
+       continue; 
+    end
+    
+    % finding these information from resolution file
     video_res_x=video_res_xs(indx);
     video_res_y=video_res_ys(indx);
     framerate=video_frates(indx);
@@ -79,29 +81,37 @@ for i=1:1:length(listofVideos)
     
     
     if exist(fullfile(datasetup.videoBoundDir,videoSBFile),'file')
-    sb_fileId=fopen(fullfile(datasetup.videoBoundDir,videoSBFile),'r');
-    sb_data  =fgetl(sb_fileId);
-    sb_data=strsplit(sb_data,' ');
-    sb_array=zeros(length(sb_data)-1,1);
-    for k=1:1:length(sb_data)-1 
-        sb_array(k)=str2double(sb_data{k});
-    end
-   fclose(sb_fileId);
+        sb_fileId=fopen(fullfile(datasetup.videoBoundDir,videoSBFile),'r');
+        sb_data  =fgetl(sb_fileId);
+        sb_data=strsplit(sb_data,' ');
+        
+        sb_data=sb_data(1:end-1);
+        sb_array= cell2mat( cellfun(@(x)str2num(x),sb_data,'uniformoutput',false));
+%         sb_array=cell2mat(sb_array);
+%         sb_array=zeros(length(sb_data)-1,1);
+%         for k=1:1:length(sb_data)-1
+%             sb_array(k)=str2double(sb_data{k});
+%         end
+        fclose(sb_fileId);
     else
-       sb_array=NaN; 
+        sb_array=NaN;
+    end
+    
+    if isnan(sb_array)
+       sb_array=[]; 
     end
     
     VideoInformation(i).shotbounds=sb_array;
     
-    indxs_gazefiles=z_cellfind(videoName,listofGazeSamples);   
+    indxs_gazefiles=z_cellfind(videoName,listofGazeSamples);
     gazefiles=listofGazeSamples(indxs_gazefiles);
-%     clearvars gaze
+    %     clearvars gaze
     gaze(length(gazefiles))=struct('viewerId',[],'data',[]);
     for j=1:1:length(gazefiles)
         fprintf('--- processing %s\n',gazefiles{j});
         
         viewerId=strsplit(gazefiles{j},'_');
-        viewerId= str2num(viewerId{1});
+        viewerId= str2double(viewerId{1});
         
         gaze_fileID=fopen( fullfile(datasetup.gazeDir,gazefiles{j}));
         gaze_data=textscan(gaze_fileID,'%f\t%f\t%f\t%f\t%f\t%s');
@@ -135,9 +145,10 @@ for i=1:1:length(listofVideos)
         
         gaze(j).viewerId=viewerId;
         gaze(j).data=[time_frames,pp_diameter,video_coord,gaze_type_int];
-%         fclose(write_fileId);
+        %         fclose(write_fileId);
     end
-            VideoInformation(i).gaze=gaze;
-
+    VideoInformation(i).gaze=gaze;
+    
 end
-% save(fullfile(datasetup.gazeDatasetDir, 'VideoInformation.mat'),'VideoInformation','-v7.3')
+VideoInformation=z_removeEmptyStructs(VideoInformation,'videoname');
+save(datasetup.VisualInformationPath,'VideoInformation','-v7.3');
