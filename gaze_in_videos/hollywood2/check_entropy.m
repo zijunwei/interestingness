@@ -1,4 +1,7 @@
-% compute entropy
+% pick 2 datasets, and compute the entropy and show difference.
+
+
+
 %
 
 
@@ -12,17 +15,28 @@
 % fprintf('Loading information...\n');
 % load(datasetup.VisualInformationPath);
 % fprintf('Done\n')
-% entropySize=[360,480];
-
+% 
+% fprintf('Loading entropy...\n');
+% load(datasetup.EntropyInformationPath);
+% fprintf('Done\n')
 %%
 % current set fdm's width to be 15, but the exact value has to be
 % re-computed
 addpath('~/Dev/ZFunc/saliency/code_forMetrics/');
 
-VideoEntropy(length(VideoInformation))=struct('videoname',[],'entropy',[]);
-for i=1:1:length(VideoInformation)
-    fprintf('---processing %s \t [ %04d | %04d]\n',VideoInformation(i).videoname,i,length(VideoInformation));
-    videoObj=VideoReader(fullfile(datasetup.videoDir,VideoInformation(i).videoname));
+% pick these 4 Id to be the following
+videoNames={'actioncliptrain00001.avi','actioncliptrain00016.avi','actioncliptrain00720.avi','actioncliptrain00770.avi'};
+
+pickedId=zeros(length(videoNames),1);
+for i=1:1:length(pickedId)
+    pickedId(i)=z_structfind(VideoEntropy,'videoname',videoNames{i});
+end
+
+
+VideoEntropy_new(length(pickedId))=struct('videoname',[],'entropy',[]);
+for i=1:1:length(pickedId)
+    fprintf('---processing %s \t [ %04d | %04d]\n',VideoInformation(pickedId( i)).videoname,pickedId( i),length(VideoInformation));
+    videoObj=VideoReader(fullfile(datasetup.videoDir,VideoInformation(pickedId( i)).videoname));
     FrameCount=1;
     entro=0;
     %     fdms={};
@@ -32,13 +46,13 @@ for i=1:1:length(VideoInformation)
         %         subplot(1,2,1)
         %         imshow(videoFrame);
         %         hold on;
-        gazePosition=zeros(length(length(VideoInformation(i).gaze)),2);
-        for j=1:1:length(VideoInformation(i).gaze)
-            gaze=( VideoInformation(i).gaze(j).data);
+        gazePosition=zeros((length(VideoInformation(pickedId(i)).gaze)),2);
+        for j=1:1:length(VideoInformation(pickedId( i)).gaze)
+            gaze=( VideoInformation(pickedId( i)).gaze(j).data);
             % for now, only use the fixation data
             gaze=gaze(gaze(:,end)==1,:);
             % convert mmseconds to framerate
-            gaze(:,1)=ceil( gaze(:,1)/1000/1000*VideoInformation(i).framerate);
+            gaze(:,1)=ceil( gaze(:,1)/1000/1000*VideoInformation(pickedId( i)).framerate);
             
             selectedGaze=gaze(gaze(:,1)==FrameCount,:);
             
@@ -52,6 +66,7 @@ for i=1:1:length(VideoInformation)
         
         
         videoFrameSz=size(videoFrame);
+        % remove the invalid ones
         gazePosition=z_cropCoordinates(gazePosition,[videoFrameSz(2),videoFrameSz(1)]);
         
         bmap=drawFixBMap(videoFrame,gazePosition);
@@ -74,10 +89,10 @@ for i=1:1:length(VideoInformation)
         FrameCount=FrameCount+1;
         
     end
-    VideoEntropy(i).videoname=VideoInformation(i).videoname;
+    VideoEntropy_new(i).videoname=VideoInformation(i).videoname;
     %     VideoEntropy(i).fdms=fdms;
     
-    VideoEntropy(i).entropy=entro;
+    VideoEntropy_new(i).entropy=entro;
 end
-save(fullfile(datasetup.gazeDatasetDir,'VideoEntropy_unResized.mat'),'VideoEntropy','-v7.3');
+% save(fullfile(datasetup.gazeDatasetDir,'VideoEntropy_unResized.mat'),'VideoEntropy','-v7.3');
 

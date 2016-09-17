@@ -2,18 +2,19 @@
 % top: the image with
 
 
-% clear;
-% clc;
-% close all
-%
-% addpath('~/Dev/ZFunc');
-% addpath('~/Dev/ZFunc/Gaze')
-% datasetup=setup();
-% fprintf('Loading data...\n')
-% load(fullfile(datasetup.gazeDatasetDir,'VideoInformation.mat'));
-% load(fullfile(datasetup.gazeDatasetDir,'VideoEntropy.mat'));
-% fprintf('Done.\n')
-% entropySize=[360,480];
+clear;
+clc;
+close all
+
+addpath('~/Dev/ZFunc');
+addpath('~/Dev/ZFunc/Gaze')
+datasetup=setup();
+fprintf('Loading data...\n')
+load(fullfile(datasetup.gazeDatasetDir,'VideoInformation.mat'));
+%load different mat file
+load(fullfile(datasetup.gazeDatasetDir,'VideoEntropy_unResizedConcise.mat'));
+fprintf('Done.\n')
+entropySize=[360,480];
 
 %%
 % current set fdm's width to be 15, but the exact value has to be
@@ -27,7 +28,7 @@ addpath('~/Dev/ZFunc/export_figure/')
 
 % add save path
 
-VideoSavePath=fullfile(datasetup.gazeDatasetDir,'visualization1');
+VideoSavePath=fullfile(datasetup.gazeDatasetDir,'visualization_unresizedEntropy');
 if ~exist(VideoSavePath,'dir')
     mkdir(VideoSavePath);
 end
@@ -38,7 +39,7 @@ warning off
 drawColors = z_distinguishable_colors(16);
 
 % i=885, starting of training
-for i=889:5:length(VideoInformation)
+for i=885:5:885
     if length(VideoEntropy(i).entropy)>250
        continue; 
     end
@@ -148,3 +149,5 @@ for i=889:5:length(VideoInformation)
     end
     close(videoWObj);
 end
+
+% draw:

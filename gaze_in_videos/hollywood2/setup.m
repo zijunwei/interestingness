@@ -14,7 +14,7 @@ else
     error('Unspeified system\n')
 end
 
-datasetup.videoDatasetDir=videoDatasetDir';
+datasetup.videoDatasetDir=videoDatasetDir;
 datasetup.videoDir=fullfile(videoDatasetDir,'AVIClips');
 datasetup.splitDir=fullfile(videoDatasetDir,'ClipSets');
 datasetup.videoBoundDir=fullfile(videoDatasetDir,'ShotBounds');
@@ -24,4 +24,5 @@ datasetup.gazeDir=fullfile(gazeDatasetDir,'samples');
 
 datasetup.gazeFileNamePtrn='%.03d_%s.txt'; % 3digit subject ID_full-video-name.txt
 datasetup.VisualInformationPath=fullfile(gazeDatasetDir,'VideoInformation.mat');
+datasetup.EntropyInformationPath=fullfile(gazeDatasetDir,'VideoEntropy_unResizedConcise.mat')
 
