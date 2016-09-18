@@ -1,4 +1,4 @@
-% pick 2 datasets, and compute the entropy and show difference.
+% compute the entropy by computing the IO of one vs rest AUC score
 
 
 
@@ -65,35 +65,36 @@ for i=1:1:length(pickedId)
         
         
         
-        videoFrameSz=size(videoFrame);
+             videoFrameSz=size(videoFrame);
+
         % remove the invalid ones
         gazePosition=z_cropCoordinates(gazePosition,[videoFrameSz(2),videoFrameSz(1)]);
         
         
+       sAUC=z_InterObserver(gazePosition,videoFrame,15);   
         
         
-        
-        
-        bmap=drawFixBMap(videoFrame,gazePosition);
-        fdm=run_antonioGaussian(bmap,15);
-        
-
-        
-        eFDM=fdm/sum(fdm(:));
-        
-        orgEntropy=entropy(fdm);
-        
-        
-        if FrameCount==1
-           maxEntropyImg=ones(videoFrameSz(1),videoFrameSz(2))*1/(videoFrameSz(1)*videoFrameSz(2));
-           maxEntropy=entropy(maxEntropyImg);
-            
-        end
-        
-        
-        
-        nViwers=size(gazePosition,1);
-        entro(FrameCount)= orgEntropy/maxEntropy*totalViewer/nViwers;
+%         
+%         bmap=drawFixBMap(videoFrame,gazePosition);
+%         fdm=run_antonioGaussian(bmap,15);
+%         
+% 
+%         
+%         eFDM=fdm/sum(fdm(:));
+%         
+%         orgEntropy=entropy(fdm);
+%         
+%         
+%         if FrameCount==1
+%            maxEntropyImg=ones(videoFrameSz(1),videoFrameSz(2))*1/(videoFrameSz(1)*videoFrameSz(2));
+%            maxEntropy=entropy(maxEntropyImg);
+%             
+%         end
+%         
+%         
+%         
+%         nViwers=size(gazePosition,1);
+        entro(FrameCount)= sAUC;
 
         
      
@@ -105,5 +106,5 @@ for i=1:1:length(pickedId)
     
     VideoEntropy_new(i).entropy=entro;
 end
-% save(fullfile(datasetup.gazeDatasetDir,'VideoEntropy_unResized.mat'),'VideoEntropy','-v7.3');
+save('VideoIO.mat','VideoEntropy_new','-v7.3');
 

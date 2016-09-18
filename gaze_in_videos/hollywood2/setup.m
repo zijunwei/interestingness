@@ -24,5 +24,6 @@ datasetup.gazeDir=fullfile(gazeDatasetDir,'samples');
 
 datasetup.gazeFileNamePtrn='%.03d_%s.txt'; % 3digit subject ID_full-video-name.txt
 datasetup.VisualInformationPath=fullfile(gazeDatasetDir,'VideoInformation.mat');
-datasetup.EntropyInformationPath=fullfile(gazeDatasetDir,'VideoEntropy_unResizedConcise.mat')
+datasetup.EntropyInformationPath=fullfile(gazeDatasetDir,'VideoEntropy_unResizedConcise.mat');
 
+end

@@ -1,8 +1,5 @@
-% pick 2 datasets, and compute the entropy and show difference.
+% compute the entropy by computing the elementwise entropy
 
-
-
-%
 
 
 % clear;
@@ -66,37 +63,36 @@ for i=1:1:length(pickedId)
         
         
         videoFrameSz=size(videoFrame);
+        
         % remove the invalid ones
         gazePosition=z_cropCoordinates(gazePosition,[videoFrameSz(2),videoFrameSz(1)]);
-        
-        
-        
         
         
         
         bmap=drawFixBMap(videoFrame,gazePosition);
         fdm=run_antonioGaussian(bmap,15);
         
-
+        
         
         eFDM=fdm/sum(fdm(:));
+        en=z_entropy(eFDM);
+        %
+        %         orgEntropy=entropy(fdm);
+        %
+        %
+        %         if FrameCount==1
+        %            maxEntropyImg=ones(videoFrameSz(1),videoFrameSz(2))*1/(videoFrameSz(1)*videoFrameSz(2));
+        %            maxEntropy=entropy(maxEntropyImg);
+        %
+        %         end
+        %
+        %
+        %
+        %         nViwers=size(gazePosition,1);
+        entro(FrameCount)= en;
         
-        orgEntropy=entropy(fdm);
         
         
-        if FrameCount==1
-           maxEntropyImg=ones(videoFrameSz(1),videoFrameSz(2))*1/(videoFrameSz(1)*videoFrameSz(2));
-           maxEntropy=entropy(maxEntropyImg);
-            
-        end
-        
-        
-        
-        nViwers=size(gazePosition,1);
-        entro(FrameCount)= orgEntropy/maxEntropy*totalViewer/nViwers;
-
-        
-     
         FrameCount=FrameCount+1;
         
     end
@@ -105,5 +101,5 @@ for i=1:1:length(pickedId)
     
     VideoEntropy_new(i).entropy=entro;
 end
-% save(fullfile(datasetup.gazeDatasetDir,'VideoEntropy_unResized.mat'),'VideoEntropy','-v7.3');
+save('VideoEntropySpatial.mat','VideoEntropy_new','-v7.3');
 
